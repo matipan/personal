@@ -1,4 +1,4 @@
-baseURL = "http://example.org/"
+baseURL = "http://matiaspan.me"
 languageCode = "en-us"
 title = "Matias Pan"
 theme = "coder" # Set the theme.
@@ -45,10 +45,10 @@ pygmentscodefencesguesssyntax = true # Enable syntax guessing for code fences wi
     weight = 3
     url = "https://twitter.com/matiaspan26/"
 
-# [[menu.main]]
-#     name = "Blog"
-#     weight = 1
-#     url  = "/posts/"
+[[menu.main]]
+    name = "Blog"
+    weight = 1
+    url  = "/posts/"
 # [[menu.main]]
 #     name = "About"
 #     weight = 2
