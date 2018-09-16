@@ -1,0 +1,55 @@
+baseURL = "http://example.org/"
+languageCode = "en-us"
+title = "Matias Pan"
+theme = "coder" # Set the theme.
+languagecode = "en" # The site’s language code used to generate RSS.
+defaultcontentlanguage = "en" # The default content language.
+
+paginate = 20 # Default number of pages per page in pagination.
+canonifyurls = true # Enable to turn relative URLs into absolute.
+
+pygmentsstyle = "b2" # Color-theme or style for syntax highlighting.
+pygmentscodefences = true # Enable code fence background highlighting.
+pygmentscodefencesguesssyntax = true # Enable syntax guessing for code fences without specified language.
+
+[params] # theme parameters
+    author = "Matias Pan"
+    info = "Software engineer @ Globant"
+    description = "Matias Pan's personal website"
+    keywords = "blog,developer,personal"
+    avatarurl = "images/profile.jpeg"
+
+    footercontent = "Contact me @ matias.pan26@gmail.com" # Add footer content
+
+    # Whether you want to hide copyright and credits in the footer.
+    # hideCredits = false
+    hideCopyright = false
+
+    # Custom CSS
+    custom_css = []
+
+# Social links
+[[params.social]]
+    name = "Github"
+    icon = "fab fa-github fa-2x"
+    weight = 1
+    url = "https://github.com/matipan/"
+[[params.social]]
+    name = "Gitlab"
+    icon = "fab fa-gitlab fa-2x"
+    weight = 2
+    url = "https://gitlab.com/matipan/"
+[[params.social]]
+    name = "Twitter"
+    icon = "fab fa-twitter fa-2x"
+    weight = 3
+    url = "https://twitter.com/matiaspan26/"
+
+# [[menu.main]]
+#     name = "Blog"
+#     weight = 1
+#     url  = "/posts/"
+# [[menu.main]]
+#     name = "About"
+#     weight = 2
+#     url = "/about/"
