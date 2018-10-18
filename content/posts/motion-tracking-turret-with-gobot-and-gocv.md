@@ -7,9 +7,9 @@ tags = ["gobot", "gocv", "computer-vision", "go", "iot"]
 categories = ["computer-vision", "gocv"]
 +++
 
-The title says it, motion tracking turret using only Go, ready to have some func?
+The title says it, motion tracking turret using only Go, ready to have some *func*?
 
-This blog post will be divided in three main parts: **Motion detection with GoCV**, **Controlling servo motors with Gobot** and **Putting it all together**. In the first part we build a lightweight motion detection algorithm that can run on low-power devices such as the RPi. In the second part we will show how to control servo motors with Gobot from the Raspberry Pi and in the last part we'll explain how to go from detecting an object on an image to telling exactly the angles in which the servos need to move in order to track it.
+This blog post will be divided into three main parts: **Motion detection with GoCV**, **Controlling servo motors with Gobot** and **Putting it all together**. In the first part we build a lightweight motion detection algorithm that can run on low-power devices such as the RPi. In the second part we will show how to control servo motors with Gobot from the Raspberry Pi and in the last part we'll explain how to go from detecting an object on an image to telling exactly the angles in which the servos need to move in order to track it.
 
 For this blog post I assume that you already know [Go](https://golang.org), if you don't but want to learn there are lots of resources out there but a good and simple place to start is the [Go tour](https://tour.golang.org).  
 
@@ -19,7 +19,7 @@ Before we start let me show you what you will have once you are done if you foll
 ![fake-turret](/images/fake-turret.jpg)
 
 Just kidding, this is what you will have(for real this time):
-![dart](/images/demo.jpeg)
+![dart](/images/dart.jpg)
 
 Looks lethal right? Lets dive in and see how we can build this sophisticated piece of machinery. Starting of with the list of things you'll need to follow this tutorial:
 
@@ -29,33 +29,33 @@ Looks lethal right? Lets dive in and see how we can build this sophisticated pie
 * One 5V and 2A power source: [MercadoLibre](https://articulo.mercadolibre.com.ar/MLA-692902383-fuente-switching-electronica-5v-2a-2ampers-micro-usb-pronext-_JM) - [Amazon](https://www.amazon.com/Outtag-Switching-Multi-Tip-Wireless-Enclosure/dp/B0771LC63X/ref=sr_1_1_sspa?ie=UTF8&qid=1539879074&sr=8-1-spons&keywords=5v+2a+power+source&psc=1).
 * Either a 3D printer or a shop that can print the case(although you could build your own)
 * C270 Logitech web camera is what I used, but any other model should work: [MercadoLibre](https://articulo.mercadolibre.com.ar/MLA-741143327-camara-web-cam-logitech-c270-720p-hd-twitch-skype-_JM) - [Amazon](https://www.amazon.com/Logitech-C270-960-001063-Webcam-Black/dp/B01HVIJH66/ref=sr_1_3?ie=UTF8&qid=1539879095&sr=8-3&keywords=c270+logitech+webcam).
-* 5V laser(this one is bad but we'll upgrade it in the future): [MercadoLibre](https://articulo.mercadolibre.com.ar/MLA-644686690-led-diodo-laser-5v-5mw-rojo-con-lente-cables-arduino-_JM) - [Amazon](https://www.amazon.com/650nm-Adjustable-Module-Copper-Pointer/dp/B07G5BCQ9G/ref=sr_1_4?ie=UTF8&qid=1539879141&sr=8-4&keywords=5v+laser).
+* 5V laser(it's not the best fit but we'll probably update it in the future): [MercadoLibre](https://articulo.mercadolibre.com.ar/MLA-644686690-led-diodo-laser-5v-5mw-rojo-con-lente-cables-arduino-_JM) - [Amazon](https://www.amazon.com/650nm-Adjustable-Module-Copper-Pointer/dp/B07G5BCQ9G/ref=sr_1_4?ie=UTF8&qid=1539879141&sr=8-4&keywords=5v+laser).
 * Bonus: soldering iron if you want to build your own PCB or solder some cables
 
 **Note**: if you want to use different things go ahead but I don't guarantee they will work with the same code.
 
 ## Motion detection with GoCV
-You might ask what is this [GoCV](https://gocv.io) thing he's talking about? Well, first lets explain what [OpenCV](https://opencv.org/) is. OpenCV is a library for computer vision, better yet, is **the** library for computer vision. It has a whole lot of functions, types and interfaces that allow us to manipulate images by applying already implemented filters and image-manipulation algorithms. It's a really cool project definitely check it out.  
+You might ask *what is this [GoCV](https://gocv.io) thing he's talking about*? Well, first lets explain what [OpenCV](https://opencv.org/) is. OpenCV is a library for computer vision, better yet, is **the** library for computer vision. It has a whole lot of functions, types and interfaces that allow us to manipulate images by applying already implemented filters and image-manipulation algorithms. It's a really cool project definitely check it out.  
 The thing is that OpenCV is implemented in C++ and it has interfaces for Java and Python. But don't be afraid my gopher-friend, the [Hybridgroup](http://hybridgroup.com/) has got us. Along with other libraries they implemented a Go wrapper for OpenCV. They did this by using CGo to call C code from Go code and that C code calls the corresponding C++ code of OpenCV. It's really efficient and works pretty good. Lucky for us this wrapper is really fast and most of the OpenCV functionality is already there.  
 
 #### Installation
-We are going to be running this program on a Raspberry Pi but since Go is nice and lets us do cross-compilation we will only install GoCV and OpenCV on our development machine. So go ahead to GoCV's [how to install](https://github.com/hybridgroup/gocv#how-to-install) section and follow the steps required for your platform. It'll take a while so I'll wait here till you are back.
+We are going to be running this program on a Raspberry Pi but since Go is nice and lets us do cross-compilation we will only install GoCV and OpenCV on our development machine. So head over to GoCV's [how to install](https://github.com/hybridgroup/gocv#how-to-install) section and follow the steps required for your platform. It'll take a while so I'll wait here till you are back.
 
-Extra: if you want to debug and change the code while testing in the Pi you cant install Go and after that install GoCV for Raspbian following [this](https://github.com/hybridgroup/gocv#raspbian) instructions.
+Extra: if you want to debug and change the code while testing in the Pi you can install Go and after that install GoCV for Raspbian following [this instructions](https://github.com/hybridgroup/gocv#raspbian).
 
 #### Motion detection algorithm
 You back? Awesome. Lets explain just a bit how the motion detection algorithm works so that you understand what it's going on and can tweak it to your needs.
 
-Since we are going to run this on the Pi we are not going to use a fancy already trainer neural network with near zero error margin. Instead we will do something relatively simple:
+Since we are going to run this on the Pi we are not going to use a fancy already trained neural network with near zero error margin. Instead we will do something relatively simple:
 
-* When the program starts we take a picture, convert it to gray and blur it using the [Guassian blur](https://en.wikipedia.org/wiki/Gaussian_blur). That first frame will be considered our background so try not be there when it starts
+* When the program starts we take a picture, convert it to gray and blur it using a [Guassian filter](https://en.wikipedia.org/wiki/Gaussian_blur). That first frame will be considered our background so try not be there when it starts
 * Constantly read new frames, perform the same conversion we did before, compute the absolute difference between the first frame and the current frame, apply a [threshold](https://en.wikipedia.org/wiki/Thresholding_(image_processing)) to the image so that we create a binary image were the area of movement will look really bright. Finally [dilate](https://en.wikipedia.org/wiki/Dilation_(morphology)) the resulting binary image and find the biggest contour, we will consider that contour our area of movement.
 
 Once all this filters were applied our image will look something like this:
 ![motion-image](/images/threshold-image.png)
 
 Time to implement this using GoCV.  
-First lets write a program that opens the feed of a camera to read images(I'll use device camera 0 but check which one you have to use), stores the first frame and starts reading new frames non stop while showing them on a window(error handling for now is out of scope):
+First lets write a program that opens the feed of a camera to read images, stores the first frame and starts reading new frames non stop while showing them on a window(error handling for now is out of scope). I'm using device 0, to check which devices you have available you can do `ls /dev/video*`:
 ```go
 package main
 
@@ -101,7 +101,7 @@ func convertFrame(src gocv.Mat, dst *gocv.Mat) {
 Lets walk through that function. First we are resizing the image with the [Resize](https://godoc.org/gocv.io/x/gocv#Resize) function since working with squared images is a lot easier and faster. Then we use the [CvtColor](https://godoc.org/gocv.io/x/gocv#CvtColor) function to convert the image to gray-scale and finally we apply the [GaussianBlur](https://godoc.org/gocv.io/x/gocv#GaussianBlur) to the gray image so that we get the blurred image we wanted.
 
 Now rewrite your previous program to call this function each time we read a new frame(including the first one). Basically add the line `convertFrame(img, &img)` after each `video.Read`, where `img` is the [gocv.Mat](https://godoc.org/gocv.io/x/gocv#Mat) you used to read a new frame. If all went well then the window should display images that look kinda like this:
-IMAGE
+![gray-image](/images/gray-image.png)
 
 We have the first frame and the current frame already converted to gray scale and blurred, now we need to compute the absolute difference between those two and apply the required threshold and dilation to the resulting difference:
 ```go
@@ -287,8 +287,8 @@ func bestContour(frame gocv.Mat, minArea float64) []image.Point {
 }
 ```
 We made a **lot** of changes in that code, lets walk through each of them. First off we now have two windows instead of one, why? Well we are going to be displaying two different types of images, in the `motion` window we will display the normal image with the rectangle drawn on top of the area of motion(if there is any). In the `threshold` window we will show the `difference` mat we've been showing so far. We also did a few resizes and move the windows over so that they are displayed side by side.  
-Since now we want to preserve the colors of the frames we read we can not use the same `frame` mat when we call `convertFrame`, this is why we have the new `gray` mat that we use for the conversion.  
-The most important change of that is right here:
+Since now we want to preserve the colors of the images we are reading we can not use the same `frame` mat when we call `convertFrame`, this is why we have the new `gray` mat that we use for the conversion.  
+The most important change of the previous code is right here:
 ```go
 cnt := bestContour(difference.Clone(), 5000)
 if len(cnt) == 0 {
@@ -314,12 +314,13 @@ Once you have your binary you can send it over with `scp`:
 ```sh
 scp <USER>@<RASPBERRY IP>:<DIRECTORY ON THE PI> <BINARY-NAME>
 ```
-Change those parameters accordingly and run the command. SSH into the RPi and run the binary, if you have a video camera connected to the Pi that can be identified as device 0 then you should see the same image you saw when ran this program on your development machine.
+Change those parameters accordingly and run the command. SSH into the RPi and run the binary, if you have a video camera connected to the Pi that can be identified with the same ID you've been using then you should see the same image you saw when you ran this program on your development machine.
 
 Congrats! Now you can go and have some beers!
-GIF
+
+![beer](/images/beer.gif)
 
 # Conclusion
-On this blog post you saw how to build a simple and lightweight motion detection program with GoCV and how to compile and run that on the raspberry pi. The idea is to connect this two servos and make them follow the area of movement, all that will be explained in Part 2 and Part 3 of this blog post, so stick around for that!
+On this blog post you saw how to build a simple and lightweight motion detection program with GoCV and how to compile and run that on the raspberry pi. The idea is to connect two servos and make them follow the area of movement, all that will be explained in Part 2 and Part 3 of this blog post, so stick around for that!
 
 Thank you!
