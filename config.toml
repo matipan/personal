@@ -22,7 +22,7 @@ pygmentscodefencesguesssyntax = true # Enable syntax guessing for code fences wi
     footercontent = "Contact me @ matias.pan26@gmail.com" # Add footer content
 
     # Whether you want to hide copyright and credits in the footer.
-    # hideCredits = false
+    hideCredits = false
     hideCopyright = false
 
     # Custom CSS
